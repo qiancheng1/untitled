@@ -22,7 +22,7 @@ class SnapshotParser(xml.sax.ContentHandler):
 
     def endElement(self, name):
         if self.CurrentData == 'project':
-            print('project name %s' % self.name)
+            # print('project name %s' % self.name)
             branch_info = json.dumps(self.name)
             if not os.path.isfile('./info.txt'):
                 with open('./info.txt', 'a') as f:
@@ -35,6 +35,15 @@ class SnapshotParser(xml.sax.ContentHandler):
     def characters(self, content):
         pass
 
+    def get_info(self):
+        with open('./info.txt', 'r') as fr:
+            for line in fr:
+                data = json.loads(line)
+                print(data)
+                # ssh -p 29418 10.0.30.9 gerrit create-branch "$project" "$new_branch_name" "old_branch"
+                # os.popen('ssh -p 29418 10.0.30.9 gerrit create-branch "%s" "%s" "%s" %(data,new_branch_name,old_branch)')
+        fr.close()
+
 
 if __name__ == '__main__':
     parser = xml.sax.make_parser()
@@ -44,3 +53,5 @@ if __name__ == '__main__':
     parser.setContentHandler(snapshot_handler)
 
     parser.parse('snapshot.xml')
+
+    snapshot_handler.get_info()

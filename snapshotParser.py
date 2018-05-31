@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+import sys
 import xml.sax
 
 from numpy.f2py.crackfortran import requiredpattern
@@ -38,13 +39,13 @@ class SnapshotParser(xml.sax.ContentHandler):
     def characters(self, content):
         pass
 
-    def get_info(self,brname1,brname2):
+    def get_info(self,obranch,nbranch):
         with open('./info.txt', 'r') as fr:
             for line in fr:
                 project = json.loads(line)
-                print(project,brname1,brname2)
+                print(project,obranch,nbranch)
                 # ssh -p 29418 10.0.30.9 gerrit create-branch "$project" "$new_branch_name" "old_branch"
-                # os.popen('ssh -p 29418 10.0.30.9 gerrit create-branch "%s" "%s" "%s" % (project,brname1,brname2)')
+                os.popen('ssh -p 29418 10.0.30.9 gerrit create-branch "%s" "%s" "%s"' % (project,obranch,nbranch))
         fr.close()
         os.remove('./info.txt')
 
@@ -62,12 +63,12 @@ if __name__ == '__main__':
     mArgsParser = argparse.ArgumentParser()
     mArgsParser.add_argument(
         '--new_branch',
-        help='type new branch name',
+        help='type a new branch name',
         required = True
     )
     mArgsParser.add_argument(
         '--old_branch',
-        help='type old branch name',
+        help='type a old branch name',
         required = True
     )
 
@@ -77,11 +78,13 @@ if __name__ == '__main__':
         mNewbranch = args.new_branch
         print(mNewbranch)
     else:
-        pass
+        print('new branch is invalid')
+        sys.exit(1)
     if args.old_branch is not None:
         mOldbranch = args.old_branch
         print(mOldbranch)
     else:
-        pass
+        print('old branch is invalid')
+        sys.exit(1)
 
     snapshot_handler.get_info(mNewbranch,mOldbranch)

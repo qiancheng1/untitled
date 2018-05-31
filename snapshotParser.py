@@ -1,8 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import argparse
 import json
 import os
 import xml.sax
+
+from numpy.f2py.crackfortran import requiredpattern
 
 
 class SnapshotParser(xml.sax.ContentHandler):
@@ -35,14 +38,15 @@ class SnapshotParser(xml.sax.ContentHandler):
     def characters(self, content):
         pass
 
-    def get_info(self):
+    def get_info(self,brname1,brname2):
         with open('./info.txt', 'r') as fr:
             for line in fr:
-                data = json.loads(line)
-                print(data)
+                project = json.loads(line)
+                print(project,brname1,brname2)
                 # ssh -p 29418 10.0.30.9 gerrit create-branch "$project" "$new_branch_name" "old_branch"
-                # os.popen('ssh -p 29418 10.0.30.9 gerrit create-branch "%s" "%s" "%s" %(data,new_branch_name,old_branch)')
+                # os.popen('ssh -p 29418 10.0.30.9 gerrit create-branch "%s" "%s" "%s" % (project,brname1,brname2)')
         fr.close()
+        os.remove('./info.txt')
 
 
 if __name__ == '__main__':
@@ -54,4 +58,30 @@ if __name__ == '__main__':
 
     parser.parse('snapshot.xml')
 
-    snapshot_handler.get_info()
+    # 创建一个命令解析器的句柄
+    mArgsParser = argparse.ArgumentParser()
+    mArgsParser.add_argument(
+        '--new_branch',
+        help='type new branch name',
+        required = True
+    )
+    mArgsParser.add_argument(
+        '--old_branch',
+        help='type old branch name',
+        required = True
+    )
+
+    args = mArgsParser.parse_args()
+    print(args)
+    if args.new_branch is not None:
+        mNewbranch = args.new_branch
+        print(mNewbranch)
+    else:
+        pass
+    if args.old_branch is not None:
+        mOldbranch = args.old_branch
+        print(mOldbranch)
+    else:
+        pass
+
+    snapshot_handler.get_info(mNewbranch,mOldbranch)

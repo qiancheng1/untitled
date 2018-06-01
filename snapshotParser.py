@@ -31,7 +31,9 @@ class SnapshotParser(xml.sax.ContentHandler):
             with open('./info.txt', 'a') as f:
                 f.write(branch_info)
                 f.write('\n')
+            f.close()
         self.CurrentData = ''
+        self.CurrentAttributes = ''
         self.name = ''
         self.path = ''
 

@@ -58,4 +58,73 @@ import time
 # l = [1,2,3,4,5]
 # tes(l)
 
+##########################################################################
+'''
+闭就是封装变量
+python中的闭包从表现形式上定义（解释）为：如果在一个内部函数里，对在外部作用域（但不是在全局作用域）的变量进行引用，那么内部函数就被认为是闭包(closure)
+'''
+# def f():
+#     name = "qiancheng"
+#     def s():
+#         print(name)
+#         def gs():
+#             name = 'gs'
+#             print(name)
+#         gs()
+#     s()
+#
+# f()
 
+##########################################################################
+'''
+有参数的装饰器
+'''
+# def auth(type):
+#     def auth_info(func):
+#         def wapper(*args,**kwargs):
+#             if type == "file":
+#                 name = input("name:")
+#                 passwd = input("passwd:")
+#                 if name=="sd" and passwd=='123':
+#                     res = func(*args,**kwargs)
+#                     return res
+#         return wapper
+#     return auth_info
+#
+#
+# @auth("file") # auth_info=auth(file)--->home=auth_info(home)
+# def home(name):
+#     print("welcome go home %s!" % name)
+#
+#
+# home("dasd")
+
+##########################################################################
+user_dic = {"username":None,"logon":False}
+
+def auth_fuc(func):
+    def wapper(*args,**kwargs):
+        if user_dic["username"] is not None and user_dic["logon"]:
+            res = func(*args,**kwargs)
+            return res
+        username = input("name").strip()
+        passwd = input("passwd").strip()
+        if username == "yyb" and passwd == "123":
+            user_dic["username"] = username
+            user_dic["logon"] = True
+            res = func(*args,**kwargs)
+            return res
+    return  wapper
+
+@auth_fuc
+def home(name):
+    print("welcome go home %s!" % name)
+
+@auth_fuc
+def shopping_car():
+    print("购物车里面有{0},{1},,{2}".format("奶茶","mm","ww"))
+
+print(user_dic)
+home("dasd")
+shopping_car()
+print(user_dic)

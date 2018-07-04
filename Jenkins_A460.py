@@ -64,6 +64,7 @@ def check_space():
     if sys.platform.startswith('linux'):
         stat = os.statvfs('.')
         avail_g = stat.f_bavail * stat.f_bsize / 1024 / 1024 / 1024
+        print(avail_g)
         if avail_g < 30:
             record_log('no space! please check you workspace,exit ....')
             sys.exit(1)
@@ -211,8 +212,8 @@ def modified_release_path():
     release_dir = "version_path"
     abs_release_dir = os.path.join(os.path.join(PWD,CODE_DIR),release_dir)
     for ih in fileinput.input('release_version.sh',inplace=True):
-        if re.findall(r"/data/mine/test/MT6572/\$user",ih):
-            newline = re.sub(r"/data/mine/test/MT6572/\$user",abs_release_dir,ih)
+        if re.findall(r"/data/mine/test/MT6572/\$MY_NAME",ih):
+            newline = re.sub(r"/data/mine/test/MT6572/\$MY_NAME",abs_release_dir,ih)
             sys.stdout.write(newline)
         else:
             sys.stdout.write(ih)
@@ -267,7 +268,7 @@ def process_release_file():
 
     os.mkdir(dl_name)
     for file in os.listdir(os.curdir):
-        if file != dl_name:      #both string, move all img into dl_name except it self
+        if file != dl_name:      # both string, move all img into dl_name except it self
             shutil.move(file,dl_name)
             zip_file(dl_name,dl_name.zip)
 
@@ -322,19 +323,19 @@ def download_code():
             result.wait()
             time.sleep(5)
             os.chdir(os.path.join(PWD,CODE_DIR))
-            subprocess.call(
+            subprocess.Popen(
                 "repoc init -u {0} -b {1} -m {2} --reference={3} --no-repo-verify".format(PROJECT_INFO["code-url"],
                                                                                           PROJECT_INFO["code_branch"],
                                                                                           PROJECT_INFO["manifest"],
                                                                                           mirror_path,shell=True))
         else:
-            result = subprocess.call(
+            result = subprocess.Popen(
                 "repoc init -u {0} -b {1} -m {2} --no-repo-verify".format(PROJECT_INFO["code-url"],
                                                                                           PROJECT_INFO["code_branch"],
                                                                                           PROJECT_INFO["manifest"], shell=True))
             result.wait()
     else:
-        result = subprocess.call(
+        result = subprocess.Popen(
             "repoc init -u {0} -b {1} -m {2} --no-repo-verify".format(PROJECT_INFO["code-url"],
                                                                       PROJECT_INFO["code_branch"],
                                                                       PROJECT_INFO["manifest"], shell=True))

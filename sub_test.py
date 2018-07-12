@@ -19,11 +19,14 @@ with open("test.xml", "r+") as hand:
     content = []
     for line in hand:
         # print(line,sep="")
-        if re.findall(r"hello", line) is not None:
+        if re.search(r"hello", line) is not None:
             newline = re.sub(r"hello", "NIHAO", line)
             content.append(newline)
-        elif re.findall(r"cheng", line):
+        elif re.search(r"cheng", line):
             newline = re.sub(r"cheng", "qian~~~~~", line)
+            content.append(newline)
+        elif re.search(r"hava",line):
+            newline = re.sub(r"\s*i","#i",line)
             content.append(newline)
         else:
             content.append(line)

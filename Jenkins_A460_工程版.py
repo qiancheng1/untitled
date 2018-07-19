@@ -3,6 +3,7 @@
 
 import fileinput
 import getopt
+import logging
 import os
 import random
 import re
@@ -25,19 +26,35 @@ PROJECT_INFO["innerver"] = innerver
 PROJECT_INFO["outver"] = outver
 
 BUILD_INFO["project"]
-BUILD_INFO["varient"]
+BUILD_INFO["variant"]
+python jenkins_A46X.py --build-variant "user"  --build-project "A460_Sprint" --save-type "dailybuild" --project-name "A460" 
+--version "NUU_A460T_U000N_V1.4B05 A6LG-TM-05"  --code-url "ssh://git@10.0.30.251:22/MT6739_O_SW2/tools/manifests.git" --code-branch "A515_DEV_BRH_SW2" 
+--code-xml "460_default.xml" --build-sign "ZZ" --branch "Stable_A460_DEV_BRH"
 '''
 
 TODAY = time.strftime("%Y%m%d")
 CUSTOM_FILE = "wind/A460/master/device/mediateksample/A460"
-CODE_DIR = "A460_code"
-PWD = os.getcwd()
+# CODE_DIR = "A460_code"
+CODE_DIR = "A460_TMO_20180712"
+# PWD = os.getcwd()
+PWD = "/home/qiancheng/code/A460/dailybuild/code"
 PROJECT_INFO = {}
 BUILD_INFO = {}
 HOSTNAME = socket.gethostname()
 HOSTADDR = socket.gethostbyname(HOSTNAME)
+RELEASE_DIR = "version_path"
 MIRROR_PATH = {"SOFT35-11": '/home1/SW3/mirror', "SOFT35-12": '/home/jenkins/mirror', "SOFT35-15": '/home1/SW3/mirror',
-               "SOFT35-16": '/home1/SW3/mirror', "SOFT35-17": '/home1/SW3/mirror'}
+               "SOFT35-16": '/home1/SW3/mirror', "SOFT35-17": '/home1/SW3/mirror',
+               "SOFT30-58": '/home/qiancheng/mirror'}
+
+
+def log_config():
+    logging.basicConfig(
+        level=logging.DEBUG,
+        filename="debug.log",
+        filemode='w',
+        format="%(asctime)s [%(lineno)d]   %(message)s"
+    )
 
 
 def shell_command(cmd, env=None):
@@ -52,9 +69,11 @@ def shell_command(cmd, env=None):
 def record_log(msg):
     os.chdir(os.path.join(PWD, CODE_DIR))
     filename = 'auto_build.log'
+    if os.path.exists(filename):
+        os.remove(filename)
     mtime = time.strftime('%Y--%m--%d--%H--%M')
     with open(filename, 'a+') as f:
-        f.write(mtime + ":    " + msg)
+        f.write(mtime + ":    " + msg + os.linesep)
     print(mtime + msg)
 
 
@@ -70,12 +89,12 @@ def check_space():
 
 def check_info(dictobj):
     project_list = ["A460_TMO", "A460_Sprint"]
-    build_varient = ["user", "eng", "debug", "userroot"]
-    #build_command = ["new", "remake", "n", "r", ""]
+    build_variant = ["user", "eng", "debug", "userroot"]
+    # build_command = ["new", "remake", "n", "r", ""]
     save_type = ["preofficial", "temp", "factory", "dailybuild"]
     for key in dictobj:
-        if key == "varient" and BUILD_INFO["varient"] not in build_varient:
-            record_log("build-varient error")
+        if key == "variant" and BUILD_INFO["variant"] not in build_variant:
+            record_log("build-variant error")
             sys.exit(1)
         elif key == "project" and BUILD_INFO["project"] not in project_list:
             record_log("build-command error")
@@ -98,9 +117,9 @@ def parse_args():
     global PROJECT_INFO
     global BUILD_INFO
     opt, args = getopt.getopt(sys.argv[1:], 'h',
-                              ['save-type=', 'project-name', 'code-url=', 'code-branch=', 'code-xml=',
-                               'code-mirror=', 'branch=', 'version=',
-                               'build-project=', 'build-varient=', 'build-sign='])
+                              ['save-type=', 'project-name=', 'code-url=', 'code-branch=', 'code-xml=',
+                               'branch=', 'version=',
+                               'build-project=', 'build-variant=', 'build-sign='])
     for k, v in opt:
         if k in ("-h", "--help"):
             print("use ur talent to guess")
@@ -114,8 +133,6 @@ def parse_args():
             PROJECT_INFO["code_branch"] = v
         elif k == "--code-xml":
             PROJECT_INFO["manifest"] = v
-        elif k == "--code-mirror":
-            PROJECT_INFO["code_mirror"] = v
         elif k == "--branch":
             PROJECT_INFO["branch"] = v
         elif k == "--version":
@@ -129,48 +146,54 @@ def parse_args():
                 PROJECT_INFO["outver"] = ""
         elif k == "--build-project":
             BUILD_INFO["project"] = v
-        elif k == "--build-varient":
-            BUILD_INFO["varient"] = v
+        elif k == "--build-variant":
+            BUILD_INFO["variant"] = v
         elif k == "--build-sign":
             BUILD_INFO["sign"] = v
-        elif k == "--variant":
-            BUILD_INFO["variant"] = v
+    logging.debug(PROJECT_INFO)
+    logging.debug(BUILD_INFO)
     check_info(PROJECT_INFO)
     check_info(BUILD_INFO)
 
 
 def custom_modify():
-    os.chdir(os.path.join(PWD,CODE_DIR))
+    os.chdir(os.path.join(PWD, CODE_DIR))
+    cur_dir = os.path.abspath(os.getcwd())
     if BUILD_INFO["sign"] != "efuse":
-        os.chdir("wind/A460/{0}/device/mediateksample/A460/".format(BUILD_INFO["project"].split("_")[1]))
+        os.chdir(os.path.join(cur_dir,
+                              "wind/A460/{0}/device/mediateksample/A460/".format(BUILD_INFO["project"].split("_")[1])))
         if os.path.exists("ProjectConfig.mk"):
-            for ih in fileinput.input("ProjectConfig.mk",inplace=True):
-                if re.findall("MTK_EFUSE_WRITER_SUPPORT\s?=.*",ih):
-                    data = re.sub("MTK_EFUSE_WRITER_SUPPORT\s?=.*","MTK_EFUSE_WRITER_SUPPORT = no",ih)
+            for ih in fileinput.input("ProjectConfig.mk", inplace=True):
+                if re.findall("MTK_EFUSE_WRITER_SUPPORT\s?=.*", ih):
+                    data = re.sub("MTK_EFUSE_WRITER_SUPPORT\s?=.*", "MTK_EFUSE_WRITER_SUPPORT = no", ih)
                     sys.stdout.write(data)
                 else:
                     sys.stdout.write(ih)
         os.chdir(os.path.join(PWD, CODE_DIR))
-        os.chdir("wind/A460/{0}/vendor/mediate/proprietary/bootable/bootloader/lk/project".format(BUILD_INFO["project"].split("_")[1]))
+        os.chdir(os.path.join(cur_dir,
+                              "wind/A460/{0}/vendor/mediatek/proprietary/bootable/bootloader/lk/project".format(
+                                  BUILD_INFO["project"].split("_")[1])))
         if os.path.exists("A460.mk"):
-            for tx in fileinput.input("A460.mk",inplace=True):
-                if re.findall("MTK_EFUSE_WRITER_SUPPORT\s?=.*",tx):
-                    data = re.sub("MTK_EFUSE_WRITER_SUPPORT\s?=.*","MTK_EFUSE_WRITER_SUPPORT = no",tx)
+            for tx in fileinput.input("A460.mk", inplace=True):
+                if re.findall("MTK_EFUSE_WRITER_SUPPORT\s?=.*", tx):
+                    data = re.sub("MTK_EFUSE_WRITER_SUPPORT\s?=.*", "MTK_EFUSE_WRITER_SUPPORT = no", tx)
                     sys.stdout.write(data)
                 else:
                     sys.stdout.write(tx)
     os.chdir(os.path.join(PWD, CODE_DIR))
-    os.chdir(CUSTOM_FILE)
+    os.chdir(os.path.join(cur_dir, CUSTOM_FILE))
     if os.path.isfile("version"):
-        for ih in fileinput.input('version'):
-            if re.findall(r"INVER"):
-                new_line = re.sub(r"INVER=.*", "INVER={0}".format(PROJECT_INFO["innerver"]), ih)
-                sys.stdout.write(new_line)
-            elif re.findall(r"OUTVER"):
-                new_line = re.sub(r"OUTVER=.*", "OUTVER={0}".format(PROJECT_INFO["outver"]), ih)
-                sys.stdout.write(new_line)
+        # 之前没有指定inplace=True,导致无法替换
+        for ver in fileinput.input("version", inplace=True):
+            if re.findall("INVER", ver):
+                data = re.sub("INVER=.*", "INVER={0}".format(PROJECT_INFO["innerver"]), ver)
+                sys.stdout.write(data)
+            elif re.findall("OUTVER", ver):
+                data = re.sub("OUTVER=.*", "OUTVER={0}".format(PROJECT_INFO["outver"]), ver)
+                sys.stdout.write(data)
             else:
-                sys.stdout.write(ih)
+                sys.stdout.write(ver)
+
 
 def build_version_without_release():
     '''
@@ -182,21 +205,25 @@ def build_version_without_release():
     record_log("start to modify version")
     os.chdir(os.path.join(PWD, CODE_DIR))
     if os.path.exists("quick_build.sh"):
+        sp = subprocess.Popen("chmod 777 quick_build.sh", shell=True)
         with open("quick_build.sh", "r+") as f:
             datalist = []
             for line in f:
                 # if re.search(r"CPUCORE", line):
                 #     newline = re.sub(r"CPUCORE=\d+", "CPUCORE={0}".format(BUILD_INFO["core"]), line)
                 #     datalist.append(newline)
-                if re.search(r"release_version.sh",line):
-                    newline = re.sub(r"\s*release_version.sh","#release_version.sh",line)
+                if re.search(r"release_version.sh", line):
+                    newline = re.sub(r"\s*./release_version.sh", r"#./release_version.sh", line)
                     datalist.append(newline)
                 else:
                     datalist.append(line)
             f.seek(0, 0)
             f.writelines(datalist)
-    sp = subprocess.Popen("./quick_build.sh", shell=True, stdin=subprocess.PIPE)
-    sp.stdin.write("{0} {1} {2}".format(BUILD_INFO["project"], "new", BUILD_INFO["variant"]))
+    # sp = subprocess.Popen("./quick_build.sh", shell=True, stdin=subprocess.PIPE)
+    # sp.stdin.write("{0} {1} {2}".format(BUILD_INFO["project"], "new", BUILD_INFO["variant"]))
+    sp = subprocess.Popen("./quick_build.sh {0} {1} {2}".format(BUILD_INFO["project"], "new", BUILD_INFO["variant"]),
+                          shell=True)
+    sp.wait()
 
 
 def check_compile_status(filename):
@@ -223,16 +250,18 @@ def new_project_info():
     with open("project.info", "w") as f:
         f.write("type={0}".format(PROJECT_INFO["save_type"]) + os.linesep)
         f.write("project={0}".format(BUILD_INFO["project"]) + os.linesep)
-        #f.write("custom=TMO" + os.linesep)  # we could not distinct TMO or Sprint at now
-        if PROJECT_INFO["save_type"] in ['preofficial','factory','temp']:
+        # f.write("custom=TMO" + os.linesep)  # we could not distinct TMO or Sprint at now
+        if PROJECT_INFO["save_type"] in ['preofficial', 'factory', 'temp']:
             if os.path.exists('/jenkins/{0}_version/{1}/{2}'.format(PROJECT_INFO["save_type"], BUILD_INFO["project"],
-                                                                        PROJECT_INFO["innerver"])):
+                                                                    PROJECT_INFO["innerver"])):
                 f.write("version={0}_{1}".format(PROJECT_INFO["innerver"], random.randint(10) + os.linesep))
             else:
                 f.write("version={0}".format(PROJECT_INFO["innerver"] + os.linesep))
         elif PROJECT_INFO["save_type"] == "dailybuild":
-            if os.path.exists('/jenkins/{0}_version/{1}/{2}_dailybuild/'.format(PROJECT_INFO["save_type"],BUILD_INFO["project"],TODAY)):
-                f.write("version={0}_{1}".format(TODAY,random.randint(10) + os.linesep))
+            if os.path.exists(
+                    '/jenkins/{0}_version/{1}/{2}_dailybuild/'.format(PROJECT_INFO["save_type"], BUILD_INFO["project"],
+                                                                      TODAY)):
+                f.write("version={0}_{1}".format(TODAY, random.randint(10) + os.linesep))
             else:
                 f.write("version={0}".format(TODAY + os.linesep))
         f.flush()
@@ -243,12 +272,11 @@ def modified_release_path():
     modify release path, not release at once
     :return: None
     '''
-    os.chdir(os.path.join(PWD,CODE_DIR))
-    release_dir = "version_path"
-    abs_release_dir = os.path.join(os.path.join(PWD, CODE_DIR), release_dir)
+    os.chdir(os.path.join(PWD, CODE_DIR))
+    abs_release_dir = os.path.join(os.path.join(PWD, CODE_DIR), RELEASE_DIR)
     for ih in fileinput.input('release_version.sh', inplace=True):
-        if re.findall(r"/data/mine/test/MT6572/$MY_NAME", ih):
-            newline = re.sub(r"/data/mine/test/MT6572/$MY_NAME", abs_release_dir, ih)
+        if re.findall(r"/data/mine/test/MT6572/\$MY_NAME", ih):
+            newline = re.sub(r"/data/mine/test/MT6572/\$MY_NAME", abs_release_dir, ih)
             sys.stdout.write(newline)
         else:
             sys.stdout.write(ih)
@@ -264,43 +292,46 @@ def release_version():
     modified_release_path()
     new_project_info()
     os.chdir(os.path.join(PWD, CODE_DIR))
-    release_dir = "version_path"
     try:
-        if os.path.exists(release_dir):
-            shutil.rmtree(release_dir)
-        os.mkdir(release_dir)
+        if os.path.exists(RELEASE_DIR):
+            shutil.rmtree(RELEASE_DIR)
+        os.mkdir(RELEASE_DIR)
     except OSError as e:
         print(traceback.format_exc())
 
-    sp = subprocess.Popen("./release_version.sh {0} symbols".format(BUILD_INFO["project"]), shell=True)
+    sp = subprocess.Popen("./release_version.sh {0}".format(PROJECT_INFO["project_name"]), shell=True)
     sp.wait()
     time.sleep(5)
 
 
 def zip_file(source, target):
-    zipf = ZipFile(target, "w", allowZip64=True,compression=zipfile.ZIP_DEFLATED)
-    for paths, filenames in os.walk(source):
-        if filenames:
-            for filename in filenames:
-                zipf.write(paths + os.path.sep + filename)
+    # os.chdir(os.path.join(PWD,CODE_DIR))
+    # cur_dir = os.getcwd()
+    # os.chdir(os.path.join(cur_dir,RELEASE_DIR))
+    zipf = ZipFile(target, "w", allowZip64=True, compression=zipfile.ZIP_DEFLATED)
+    # for paths, filenames in os.walk(source):
+    for img in os.listdir(source):
+        zipf.write(source + os.path.sep + img)
+        # if filenames:
+        # for filename in filenames:
+        # zipf.write(paths + os.path.sep + filename)
     zipf.close()
 
 
 def process_release_file():
-    release_dir = "version_path"
     os.chdir(os.path.join(PWD, CODE_DIR))
-    os.chdir(release_dir)
-    curdir = os.getcwd()
-    dl_name = BUILD_INFO["innerver"] + "DL"
+    os.chdir(RELEASE_DIR)
+    curdir = os.path.abspath(os.getcwd())
+    dl_name = PROJECT_INFO["innerver"] + "DL"
 
     os.mkdir(dl_name)
-    for file in os.listdir(os.curdir):
+    for file in os.listdir(curdir):
         if file != dl_name and file != "vmlinux.zip":  # both string, move all img into dl_name except it self
             shutil.move(file, dl_name)
-            zip_file(dl_name, dl_name.zip)
+    zip_file(dl_name, dl_name + ".zip")
 
-    shutil.copy(dl_name.zip, "/data/mine/test/MT6572/jenkins/")
-    shutil.copy("vmlinux.zip","/data/mine/test/MT6572/jenkins/")
+    shutil.copy(dl_name + ".zip", "/data/mine/test/MT6572/jenkins/")
+    shutil.copy("vmlinux.zip", "/data/mine/test/MT6572/jenkins/")
 
 
 def do_snapshot():
@@ -335,7 +366,8 @@ def download_code():
         os.chdir(CODE_DIR)
 
     if HOSTNAME in MIRROR_PATH:
-        mirror_path = os.path.join(MIRROR_PATH[HOSTNAME], "A46X_mirror_repo")
+        # mirror_path = os.path.join(MIRROR_PATH[HOSTNAME], "A46X_mirror_repo")
+        mirror_path = os.path.join(MIRROR_PATH[HOSTNAME], "46X_mirror_8.0")
         if os.path.exists(mirror_path):
             mirror_flag = True
         else:
@@ -348,21 +380,21 @@ def download_code():
             time.sleep(5)
             os.chdir(os.path.join(PWD, CODE_DIR))
             subprocess.Popen(
-                "repoc init -u {0} -b {1} -m {2} --reference={3} --no-repo-verify".format(PROJECT_INFO["code-url"],
+                "repoc init -u {0} -b {1} -m {2} --reference={3} --no-repo-verify".format(PROJECT_INFO["code_url"],
                                                                                           PROJECT_INFO["code_branch"],
                                                                                           PROJECT_INFO["manifest"],
-                                                                                          mirror_path, shell=True))
+                                                                                          mirror_path), shell=True)
         else:
             result = subprocess.Popen(
-                "repoc init -u {0} -b {1} -m {2} --no-repo-verify".format(PROJECT_INFO["code-url"],
+                "repoc init -u {0} -b {1} -m {2} --no-repo-verify".format(PROJECT_INFO["code_url"],
                                                                           PROJECT_INFO["code_branch"],
-                                                                          PROJECT_INFO["manifest"], shell=True))
+                                                                          PROJECT_INFO["manifest"]), shell=True)
             result.wait()
     else:
         result = subprocess.Popen(
-            "repoc init -u {0} -b {1} -m {2} --no-repo-verify".format(PROJECT_INFO["code-url"],
+            "repoc init -u {0} -b {1} -m {2} --no-repo-verify".format(PROJECT_INFO["code_url"],
                                                                       PROJECT_INFO["code_branch"],
-                                                                      PROJECT_INFO["manifest"], shell=True))
+                                                                      PROJECT_INFO["manifest"]), shell=True)
         result.wait()
     time.sleep(5)
     result = subprocess.Popen("repoc sync -cj8 && repoc start {0} --all".format(PROJECT_INFO["branch"]), shell=True)
@@ -381,31 +413,32 @@ def new_project_info():
     with open("project.info", "w") as pf:
         pf.write("type={0}".format(PROJECT_INFO["save_type"]) + os.linesep)
         pf.write("project={0}".format(PROJECT_INFO["project_name"]) + os.linesep)
-        pf.write("costom={0}".format(BUILD_INFO["project"].split("_")[1]) + os.linesep)
+        pf.write("custom={0}".format(BUILD_INFO["project"].split("_")[1]) + os.linesep)
 
         if PROJECT_INFO["save_type"] in ['preofficial', 'factory', 'temp']:
             if os.path.exists(
                     '/jenkins/{0}_version/{1}/{3}'.format(PROJECT_INFO["save_type"], PROJECT_INFO["project_name"],
                                                           PROJECT_INFO["innerver"])):
-                pf.write("version={0}_{1}".format(PROJECT_INFO["innerver"], random.randint(1000) + os.linesep))
+                pf.write("version={0}_{1}".format(PROJECT_INFO["innerver"], random.randint(10) + os.linesep))
             else:
                 pf.write("version={0}".format(PROJECT_INFO["innerver"] + os.linesep))
         elif PROJECT_INFO["save_type"] == "dailybuild":
-            if os.path.exists("/jenkins/{0}_version/{1}/{2}_dailybuild/{3}".format(PROJECT_INFO["project_name"],
-                                                                                   PROJECT_INFO["project_name"],
-                                                                                   BUILD_INFO["project"], TODAY)):
-                pf.write("version={0}_{1}".format(TODAY, random.randint(1000) + os.linesep))
+            if os.path.exists("/jenkins/{0}_version/{1}/{2}".format(PROJECT_INFO["save_type"],
+                                                                     PROJECT_INFO["project_name"], TODAY)):
+                pf.write("version={0}_{1}".format(TODAY, random.randint(10) + os.linesep))
             else:
                 pf.write("version={0}".format(TODAY + os.linesep))
             pf.write('option=custom:{0}_dailybuild'.format(BUILD_INFO["project"]) + os.linesep)
         pf.flush()
 
+
 if __name__ == '__main__':
+    log_config()
     check_space()
     parse_args()
-    download_code()
+    # download_code()
     custom_modify()
-    build_version_without_release()
+    # build_version_without_release()
     release_version()
     process_release_file()
     do_snapshot()

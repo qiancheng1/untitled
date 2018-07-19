@@ -8,3 +8,11 @@ qianchne cheng
 cheng
 hello qianche big w
 i hava some confuse
+
+def log_config():
+    logging.basicConfig(
+        level=logging.DEBUG,
+        filename="debug.log",
+        filemode='w',
+        format="%(asctime)s [%(lineno)d]   %(message)s"
+    )

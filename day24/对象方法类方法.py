@@ -15,3 +15,5 @@ class School():
 
 s1 = School("tsinghua",'beijing',10)
 s2 = School("Sahikto","Tokyo",10101011)
+
+print(s1.get_price)

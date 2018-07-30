@@ -17,6 +17,7 @@ ZIP_FLAG = False
 OUTPATH = "out/target/product"
 release_project = "A460"
 release_type = "all"
+PLATFORM = ""
 
 
 def logging_info():
@@ -51,7 +52,7 @@ def check_parameter(params):
         elif param == "zip":
             ZIP_FLAG = True
         else:
-            print("error! release project is null!")
+            logging.error("error! release project is null!")
             sys.exit(1)
 
 
@@ -62,27 +63,29 @@ def process_release_version():
     os.mkdir("version_package")
 
 
-def process_ota_file():
-    pass
-
-
-def process_diff_file():
-    pass
-
-
 def parse_args():
+    global ZIP_FLAG
+    global release_type
+    global release_project
+    project_list = ["A460", "A515"]
+    release_type_list = ["ota", "otapackge", "all", "diff"]
     args_list = sys.argv[1:]
     if len(args_list) != 0:
         args_set = set(args_list)
         logging.info("args set:", args_set)
-        check_parameter(args_set)
+        # check_parameter(args_set)
         for param in args_set:
-            if param == "all":
-                process_release_version()
-            elif param == "ota" or param == "otapackage":
-                process_ota_file()
-            elif param == "diff":
-                process_diff_file()
+            if param in project_list:
+                release_project = param
+            elif param in release_type_list:
+                release_type = param
+            elif param not in release_type_list:
+                release_type = "all"
+            elif param == "zip":
+                ZIP_FLAG = True
+            else:
+                logging.error("error! release project is null!")
+                sys.exit(1)
 
 
 def get_version_info():
@@ -117,6 +120,7 @@ def check_build_status():
 def init_config():
     logging.info("start to init config")
     global OUTPATH
+    global PLATFORM
     if release_project == "A460":
         HARDWARE_VER = "S01"
         OUTPATH = OUTPATH + os.path.sep + "A460"
@@ -151,13 +155,55 @@ def init_config():
                         "system.img".format(PLATFORM, release_project)]
 
 
+def all_system_file_ready():
+    if release_type == "all":
+        os.chdir(os.path.join(OUTPATH, "obj/ETC"))
+        for i in os.listdir("."):
+            if re.findall(r"MDDB_InfoCustomAppSrcP_MT6739_S00_MOLY_LR12A_.*", i):
+                os.chdir(i)
+                for j in list(i):
+                    if re.findall(r"^MDDB.*ulwctg_n\.EDB$", j):
+                        shutil.copy(j, "{0}/Modem_Database_ulwctg".format(OUTPATH))
+                    elif re.findall(r"MDDB.*ulwtg_n\.EDB$", j):
+                        shutil.copy(j, "{0}/Modem_Database_ulwtg".format(OUTPATH))
+        os.chdir(ROOT);
+        os.chdir(OUTPATH)
+        if os.path.exists("Modem_Database_ulwctg"):
+            release_list = ["logo.bin", "{0}_Android_scatter.txt", "preloader_{1}.bin", "AP_Database",
+                            "Modem_Database_ulwctg", "boot.img", "secro.img",
+                            "userdata.img", "lk.img", "recovery.img", "cache.img", "mcupmfw.img", "md1dsp.img",
+                            "loader_ext.img", "spmfw.img", "tee.img", "md1img.img", "odmdtbo.img", "vendor.img",
+                            "system.img".format(PLATFORM, release_project)]
+        elif os.path.exists("Modem_Database_ulwtg"):
+            release_list = ["logo.bin", "{0}_Android_scatter.txt", "preloader_{1}.bin", "AP_Database",
+                            "Modem_Database_ulwctg", "boot.img", "secro.img",
+                            "userdata.img", "lk.img", "recovery.img", "cache.img", "mcupmfw.img", "md1dsp.img",
+                            "loader_ext.img", "spmfw.img", "tee.img", "md1img.img", "odmdtbo.img", "vendor.img",
+                            "system.img".format(PLATFORM, release_project)]
+
+
+def process_release_param():
+    if release_type == "all":
+        all_system_file_ready()
+    elif release_type == "ota" or release_type == "otapackage":
+
+        release_file =
+
+
+def release_files():
+    process_release_param()
+
+
 if __name__ == "__main__":
     logging_info()
-    result = check_build_status()
-    if result:
-        get_version_info()
-    else:
-        logging.error("compile error, see build.log for more information")
-        sys.exit(1)
+    # result = check_build_status()
+    # if result:
+    #     get_version_info()
+    # else:
+    #     logging.error("compile error, see build.log for more information")
+    #     sys.exit(1)
     parse_args()
     init_config()
+    if ZIP_FLAG:
+        release_files()
+    else:

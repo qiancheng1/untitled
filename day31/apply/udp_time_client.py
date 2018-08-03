@@ -13,6 +13,7 @@ while True:
     if msg == "quit":break
     time_client.sendto(msg.encode("utf-8"),ip_port)
     data,addr = time_client.recvfrom(buffer_size)
+
     # 没有达到想要的效果
     print(data.decode("utf-8"))
 

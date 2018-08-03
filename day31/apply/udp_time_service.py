@@ -9,10 +9,14 @@ time_service.bind(ip_port)
 
 while True:
     data,addr = time_service.recvfrom(buffer_size)
-    if not data:break
+    print(data)
+
+
+    if not data:
+        str_data = '%Y-%m-%d %X'
     else:
-        print(data)
-    str_data = data.decode("utf-8")
+        str_data = data.decode("utf-8")
     msg = time.strftime(str_data)
+
     time_service.sendto(msg.encode("utf-8"),addr)
 time_service.close()

@@ -86,19 +86,24 @@ def do_checksum(route):
     # sp.wait()
     # # rm CheckSum_Gen.exe  FlashTool* CheckSum_Gen* libflashtool* checksum.zip
     # rm_list = ['CheckSum_Gen','CheckSum_Gen.ilk','CheckSum_Gen.pdb','checksum.zip']
-    shutil.copy(TOOLS_DIR + os.path.sep + 'checksum.zip', '.')
-    ret, stdout, stderr = shell('unzip {0}'.format('checksum.zip'))
+    shutil.copy(TOOLS_DIR + os.path.sep + 'CheckSum_Gen.zip', '.')
+    ret, stdout, stderr = shell('unzip {0}'.format('CheckSum_Gen.zip'))
     if ret != 0:
         print('unzip Checksum error')
         sys.exit(1)
     else:
-        print('\033[0,32m %s \033[0m' % '请手动到archivement里面手动执行checksum')
-        if not os.path.exists('Checksum.ini'):
-            sys.stdout.write('.')
-            sys.stdout.flush()
-            time.sleep(0.5)
+        print('\033[0;32m %s \033[0m' % '请手动到当前路径的archivement里面手动执行checksum')
+        while True:
+            if os.path.exists('Checksum.ini'):
+                sys.stdout.write(os.linesep)
+                sys.stdout.flush()
+                break
+            else:
+                sys.stdout.write('.')
+                sys.stdout.flush()
+                time.sleep(0.5)
     time.sleep(1)
-    rm_list = ['CheckSum_Gen.exe']
+    rm_list = ['CheckSum_Gen.exe','CheckSum_Gen.zip']
     for file in os.listdir('.'):
         if file.startswith('FlashToolLib') or file in rm_list:
             logging.info('delete file >> %s' % file)
@@ -144,6 +149,7 @@ def release_file_handler(flag):
             shutil.move(file,dl_name)
 
     do_checksum(dl_name)
+    logging.info('now ready to zip DL imgages,plz hold on')
     zip_file(dl_name,dl_name + '.zip')
 
     origin_dir = os.getcwd()
@@ -194,7 +200,7 @@ def do_md5():
         chf.write('* wind-mobi md5sum checklist'+ os.linesep)
         chf.write('*/' + os.linesep)
         for key in md5_info:
-            chf.write(md5_info[key] + '  *' + key + os.linesep)
+            chf.write(md5_info[key] + ' *' + key + os.linesep)
 
 
 

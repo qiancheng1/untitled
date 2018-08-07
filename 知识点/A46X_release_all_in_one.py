@@ -20,7 +20,7 @@ import zipfile
 from zipfile import ZipFile
 
 PWD = os.getcwd()
-CHECKSUM_DIR = '/home/qiancheng/code/workspace/SCM_script'
+TOOLS_DIR = '/home/qiancheng/code/workspace/SCM_script'
 buffer_size = 10240
 DATE = time.strftime('%Y%m%d')
 # owner = shell()
@@ -49,15 +49,15 @@ def parse_parameter():
                 sign_flag = False
             else:
                 sign_flag = True
-    logging.info("sign flag is:", sign_flag)
+    logging.info("sign flag is: %s" % sign_flag)
     return sign_flag
 
 
 def modify_release_file():
-    for fi in fileinput.input('release_version_efuse.sh', replace=True):
-        logging.debug("efuse find /data/mine/test/MT6752:", re.findall(r'/data/mine/test/MT6752', fi))
-        if len(re.findall(r'/data/mine/test/MT6752', fi)):
-            content = re.sub(r'/data/mine/test/MT6752/\$MY_NAME', 'archivement')
+    for fi in fileinput.input('release_version_efuse.sh', inplace=True):
+        logging.debug("efuse find /data/mine/test/MT6572: %s" % re.findall(r'/data/mine/test/MT6752', fi))
+        if len(re.findall(r'/data/mine/test/MT6572', fi)):
+            content = re.sub(r'/data/mine/test/MT6572/\$MY_NAME', 'archivement',fi)
             sys.stdout.write(content)
         else:
             sys.stdout.write(fi)
@@ -66,35 +66,55 @@ def modify_release_file():
 def zip_file(source,target):
     zipf = ZipFile(target,'w',allowZip64=True,compression=zipfile.ZIP_DEFLATED)
     for img in os.listdir(source):
-        zipf.write(img)
+        zipf.write(source + os.path.sep + img)
     zipf.close()
 
 
 def do_checksum(route):
-    logging.info("current dir",os.getced())
+    logging.info("current dir %s" % os.getcwd())
     origin_dir = os.getcwd()
     os.chdir(route)
-    shutil.copy(CHECKSUM_DIR+os.path.sep+'checksum.zip','.')
-    ret,stdout,stderr = shell('unzip {0}'.format('checksum.zip'))
+    '''
+    目前shell下的CheckSum_Gen并不支持这样做checksum.
+    所以现在只能用折中的方法,手动执行.
+    '''
+    # shutil.copy(TOOLS_DIR + os.path.sep + 'checksum.zip', '.')
+    # ret,stdout,stderr = shell('unzip {0}'.format('checksum.zip'))
+    # if ret != 0:
+    #     print('unzip error')
+    # sp = subprocess.Popen('./CheckSum_Gen',shell=True)
+    # sp.wait()
+    # # rm CheckSum_Gen.exe  FlashTool* CheckSum_Gen* libflashtool* checksum.zip
+    # rm_list = ['CheckSum_Gen','CheckSum_Gen.ilk','CheckSum_Gen.pdb','checksum.zip']
+    shutil.copy(TOOLS_DIR + os.path.sep + 'checksum.zip', '.')
+    ret, stdout, stderr = shell('unzip {0}'.format('checksum.zip'))
     if ret != 0:
-        print('unzip error')
-    subprocess.Popen('./CheckSum_Gen',shell=True)
-    # rm CheckSum_Gen.exe  FlashTool* CheckSum_Gen* libflashtool* checksum.zip
-    rm_list = ['CheckSum_Gen','CheckSum_Gen.ilk','CheckSum_Gen.pdb']
+        print('unzip Checksum error')
+        sys.exit(1)
+    else:
+        print('\033[0,32m %s \033[0m' % '请手动到archivement里面手动执行checksum')
+        if not os.path.exists('Checksum.ini'):
+            sys.stdout.write('.')
+            sys.stdout.flush()
+            time.sleep(0.5)
+    time.sleep(1)
+    rm_list = ['CheckSum_Gen.exe']
     for file in os.listdir('.'):
-        if file.startswith('FlashTool') or file in rm_list:
-            logging.info('delete file >>',file)
+        if file.startswith('FlashToolLib') or file in rm_list:
+            logging.info('delete file >> %s' % file)
             os.remove(file)
     os.chdir(origin_dir)
 
 def release_file_handler(flag):
     os.chdir(PWD)
+    if os.path.exists('archivement'):
+        shutil.rmtree('archivement')
     os.mkdir('archivement')
 
     with open('version','r') as f:
         data = f.read()
         matcher = re.search(r'INVER=(.*)',data)
-        logging.info('dl_name',matcher.group(1))
+        logging.info('dl_name %s' % matcher.group(1))
         if matcher.group(1):
             dl_name =matcher.group(1)
         else:
@@ -128,10 +148,27 @@ def release_file_handler(flag):
 
     origin_dir = os.getcwd()
     os.chdir(PWD)
-    subprocess.Popen("repoc manifest -ro {0}_{1}.xml".format(dl_name,DATE))
+    sp = subprocess.Popen("repoc manifest -ro manifest-{0}_{1}.xml".format(dl_name,DATE),shell=True)
+    sp.wait()
     shutil.copy("{0}_{1}.xml".format(dl_name,DATE),'archivement')
-    os.chdir(origin_dir)
+    # os.chdir(origin_dir)
 
+    # 生成log_update.csv
+    # os.chdir(TOOLS_DIR)
+    snapshots = []
+    shutil.copy('{0}/shell_script/get_snapshot_commit_diff.sh'.format(TOOLS_DIR),'.')
+    for file in os.listdir('.'):
+        if file.startswith('manifest'):
+            snapshots.append(file)
+            snapshots = sorted(snapshots,key=lambda x:os.path.getctime(file),reverse=True)
+            logging.info("snapshots sorted %s" % snapshots)
+    shell('./get_snapshot_commit_diff.sh {1} {0}'.format(snapshots[0],snapshots[1]))
+    if os.path.exists('log_update.csv'):
+        shutil.copy('log_update.csv','./archivement')
+    else:
+        print('execute get_snapshot_commit_diff.sh error!')
+    if os.path.exists('updateB2C.zip'):
+        shutil.copy('updateB2C.zip','./archivement')
 
 def do_md5():
     os.chdir(os.path.join(PWD, "archivement"))
@@ -140,10 +177,10 @@ def do_md5():
     for img in os.listdir('.'):
         if img.endswith('zip'):
             md5_list.append(img)
-    logging.info('md5list >>',md5_list)
+    logging.info('md5list >>%s' % md5_list)
     for file in md5_list:
         file_hash = hashlib.md5()
-        with open(file,'wb') as hf:
+        with open(file,'rb') as hf:
             while True:
                 b = hf.read(buffer_size)
                 if not b:
@@ -151,13 +188,13 @@ def do_md5():
                 file_hash.update(b)
         # file_hash.hexdigest()
         md5_info[file] = file_hash.hexdigest()
-    
+
     with open('checklist.md5','w') as chf:
-        chf.write('/*')
-        chf.write('* wind-mobi md5sum checklist')
-        chf.write('*/')
+        chf.write('/*'+os.linesep)
+        chf.write('* wind-mobi md5sum checklist'+ os.linesep)
+        chf.write('*/' + os.linesep)
         for key in md5_info:
-            chf.write(md5_info[key] + ' *' + key)
+            chf.write(md5_info[key] + '  *' + key + os.linesep)
 
 
 
@@ -169,12 +206,13 @@ def release_file_to_routeway():
         print(stderr)
     else:
         my_name = stdout
-    out_path = '/data/mine/test/{0}'.format(my_name)
+    out_path = '/data/mine/test/MT6572/{0}'.format(my_name)
 
     for img in os.listdir('.'):
         if img.endswith('zip'):
             shutil.copy(img,out_path)
-
+        if img.endswith('xml') or img.endswith('csv') or img.endswith('md5'):
+            shutil.copy(img,out_path)
 
 
 if __name__ == '__main__':

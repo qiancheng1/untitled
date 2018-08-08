@@ -247,7 +247,7 @@ def release_file_to_routeway():
     if ret != 0:
         print(stderr)
     else:
-        my_name = stdout
+        my_name = stdout.strip()
     out_path = '/data/mine/test/MT6572/{0}'.format(my_name)
 
     for img in os.listdir('.'):

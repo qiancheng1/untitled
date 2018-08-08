@@ -20,10 +20,28 @@ import zipfile
 from zipfile import ZipFile
 
 PWD = os.getcwd()
-TOOLS_DIR = '/home/qiancheng/code/workspace/SCM_script'
+tools_dict = {'qiancheng':'/home/qiancheng/code/workspace/SCM_script','miaoyulu':'/home2/miaoyulu/SCM_script',
+              'sw2_scm1':'/home/sw2_scm1/SCM_script','sw3_scm1':'/home/sw3_scm1/SCM_script'}
+TOOLS_DIR=''
 buffer_size = 10240
 DATE = time.strftime('%Y%m%d')
 # owner = shell()
+
+def init():
+    global TOOLS_DIR
+    ret,stdout,stderr = shell('whoami')
+    if ret != 0:
+        logging.error("%s init config error!" % stderr)
+        print(stderr)
+        sys.exit(1)
+    else:
+        owner = stdout.strip()
+        # 之前犯了一个错误,owner作用域只有在if条件循环里面,if缩进有问题导致的异常,查不到,还有有stdout有空格导致读不到
+        if owner in tools_dict:
+            TOOLS_DIR = tools_dict[owner]
+            logging.info('tools dir >> %s' % TOOLS_DIR)
+        else:
+            logging.info('tools dir is null, may cause some mistakes')
 
 def shell(cmd, env=None):
     if sys.platform.startswith('linux'):
@@ -53,8 +71,8 @@ def parse_parameter():
     return sign_flag
 
 
-def modify_release_file():
-    for fi in fileinput.input('release_version_efuse.sh', inplace=True):
+def modify_release_file(file):
+    for fi in fileinput.input(file, inplace=True):
         logging.debug("efuse find /data/mine/test/MT6572: %s" % re.findall(r'/data/mine/test/MT6752', fi))
         if len(re.findall(r'/data/mine/test/MT6572', fi)):
             content = re.sub(r'/data/mine/test/MT6572/\$MY_NAME', 'archivement',fi)
@@ -86,7 +104,15 @@ def do_checksum(route):
     # sp.wait()
     # # rm CheckSum_Gen.exe  FlashTool* CheckSum_Gen* libflashtool* checksum.zip
     # rm_list = ['CheckSum_Gen','CheckSum_Gen.ilk','CheckSum_Gen.pdb','checksum.zip']
-    shutil.copy(TOOLS_DIR + os.path.sep + 'CheckSum_Gen.zip', '.')
+    if os.path.exists('{0}{1}{2}'.format(TOOLS_DIR,os.path.sep,'CheckSum_Gen.zip')):
+        shutil.copy(TOOLS_DIR + os.path.sep + 'CheckSum_Gen.zip', '.')
+    elif os.path.exists('{0}{1}{2}'.format(PWD,os.path.sep,'CheckSum_Gen.zip')):
+        shutil.copy(PWD + os.path.sep + 'CheckSum_Gen.zip', '.')
+    elif os.path.exists('CheckSum_Gen.zip'):
+        pass
+    else:
+        print('CheckSum_Gen.zip is not exits')
+        sys.exit(1)
     ret, stdout, stderr = shell('unzip {0}'.format('CheckSum_Gen.zip'))
     if ret != 0:
         print('unzip Checksum error')
@@ -127,13 +153,13 @@ def release_file_handler(flag):
 
     if flag:
         shutil.copy('./tools/wind/release_version_efuse.sh', './')
-        modify_release_file()
+        modify_release_file('release_version_efuse.sh')
         # ret, stdout, stderr = shell('./release_version_efuse.sh A460 ota')
         sp = subprocess.Popen('./release_version_efuse.sh A460 ota',shell=True)
         sp.wait()
         # logging.info('./release_version_efuse.sh',stdout)
     else:
-        modify_release_file()
+        modify_release_file('release_version.sh')
         sp = subprocess.Popen('./release_version.sh A460 ota',shell=True)
         sp.wait()
 
@@ -149,26 +175,36 @@ def release_file_handler(flag):
             shutil.move(file,dl_name)
 
     do_checksum(dl_name)
-    logging.info('now ready to zip DL imgages,plz hold on')
+    logging.info('now ready to zip DL images,plz hold on')
     zip_file(dl_name,dl_name + '.zip')
 
     origin_dir = os.getcwd()
     os.chdir(PWD)
+    logging.info('now do snapshot,plz hold on')
     sp = subprocess.Popen("repoc manifest -ro manifest-{0}_{1}.xml".format(dl_name,DATE),shell=True)
     sp.wait()
-    shutil.copy("{0}_{1}.xml".format(dl_name,DATE),'archivement')
+    shutil.copy("manifest-{0}_{1}.xml".format(dl_name,DATE),'archivement')
     # os.chdir(origin_dir)
 
     # 生成log_update.csv
     # os.chdir(TOOLS_DIR)
     snapshots = []
-    shutil.copy('{0}/shell_script/get_snapshot_commit_diff.sh'.format(TOOLS_DIR),'.')
+    if os.path.exists('{0}'.format(TOOLS_DIR)):
+        shutil.copy('{0}/shell_script/get_snapshot_commit_diff.sh'.format(TOOLS_DIR), '.')
+    elif os.path.exists('get_snapshot_commit_diff.sh'):
+        pass
+    else:
+        print('get_snapshot_commit_diff.sh is not exits')
+        sys.exit(1)
     for file in os.listdir('.'):
         if file.startswith('manifest'):
             snapshots.append(file)
             snapshots = sorted(snapshots,key=lambda x:os.path.getctime(file),reverse=True)
             logging.info("snapshots sorted %s" % snapshots)
-    shell('./get_snapshot_commit_diff.sh {1} {0}'.format(snapshots[0],snapshots[1]))
+    if len(snapshots) != 2:
+        logging.info('has no matched snapshots,skip execute get_snapshot_commit_diff')
+    else:
+        shell('./get_snapshot_commit_diff.sh {1} {0}'.format(snapshots[0],snapshots[1]))
     if os.path.exists('log_update.csv'):
         shutil.copy('log_update.csv','./archivement')
     else:
@@ -223,6 +259,7 @@ def release_file_to_routeway():
 
 if __name__ == '__main__':
     log_config()
+    init()
     sign_flag = parse_parameter()
     release_file_handler(sign_flag)
     do_md5()

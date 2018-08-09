@@ -239,7 +239,6 @@ def do_md5():
             chf.write(md5_info[key] + ' *' + key + os.linesep)
 
 
-
 def release_file_to_routeway():
     os.chdir(os.path.join(PWD, "archivement"))
 

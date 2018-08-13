@@ -4,6 +4,7 @@ http://www.cnblogs.com/yuanchenqi/articles/5722574.html
 
 
 ##触发方式:
+select中的就是水平触发的方式
 1.水平触发
 电平在1或者0的时候触发
 2.边缘触发
@@ -11,3 +12,10 @@ http://www.cnblogs.com/yuanchenqi/articles/5722574.html
 
 ##IO多路复用好处:
 同时可以监听多个连接
+这个好处决定了这个方法很广泛的用途
+
+
+IO多路复用方式:
+select
+pull
+epoll

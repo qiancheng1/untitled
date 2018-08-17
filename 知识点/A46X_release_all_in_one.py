@@ -62,16 +62,22 @@ def log_config():
 def parse_parameter():
     os.chdir(PWD)
     if os.path.exists("build-log"):
-        for fi in fileinput.input("build-log/record.log"):
-            if len(re.findall(r'efuse', fi)):
-                sign_flag = False
-            else:
-                sign_flag = True
+        # 两个方法都行,认为第二个好一点,还有个for line in f,这样的也行
+        # 只不过我把判断条件弄错了 if true
+        # for fi in fileinput.input("build-log/record.log"):
+        with open('build-log/record.log','r') as f:
+            fi = f.readline()
+            for line in f:
+                if not len(re.findall(r'efuse', line)):
+                    sign_flag = False
+                else:
+                    sign_flag = True
     logging.info("sign flag is: %s" % sign_flag)
     return sign_flag
 
 
 def modify_release_file(file):
+    shell('chmod 777 {0}'.format(file))
     for fi in fileinput.input(file, inplace=True):
         logging.debug("efuse find /data/mine/test/MT6572: %s" % re.findall(r'/data/mine/test/MT6752', fi))
         if len(re.findall(r'/data/mine/test/MT6572', fi)):
@@ -173,7 +179,10 @@ def release_file_handler(flag):
             continue
         else:
             shutil.move(file,dl_name)
-
+    current_dir = os.getcwd()
+    os.chdir(dl_name)
+    do_md5()
+    os.chdir(current_dir)
     do_checksum(dl_name)
     logging.info('now ready to zip DL images,plz hold on')
     zip_file(dl_name,dl_name + '.zip')
@@ -211,13 +220,16 @@ def release_file_handler(flag):
         print('execute get_snapshot_commit_diff.sh error!')
     if os.path.exists('updateB2C.zip'):
         shutil.copy('updateB2C.zip','./archivement')
+    os.chdir(os.path.join(PWD, "archivement"))
 
 def do_md5():
-    os.chdir(os.path.join(PWD, "archivement"))
+    # os.chdir(os.path.join(PWD, "archivement"))
     md5_list = []
     md5_info = {}
     for img in os.listdir('.'):
-        if img.endswith('zip'):
+        if os.path.exists('cache.img'):
+            md5_list.append(img)
+        elif img.endswith('zip'):
             md5_list.append(img)
     logging.info('md5list >>%s' % md5_list)
     for file in md5_list:

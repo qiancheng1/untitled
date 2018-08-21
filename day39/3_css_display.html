@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSS Display</title>
+
+    <style>
+        div,p,span,a{
+            width: 100px;
+            height: 100px;
+        }
+        /*这样设置的话,既有内联标签的不独占一行,又有块级标签的可调节大小的优点*/
+        div{
+            background-color: chartreuse;
+            /*display: inline-block;*/
+        }
+
+        p{
+            background-color: red;
+            /*display: inline-block;*/
+        }
+
+        span{
+            background-color: rebeccapurple;
+            display: inline-block;
+        }
+
+        a{
+            background-color: brown;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<div>div标签</div>
+<p>p标签</p>
+
+<span>span标签</span>
+<a href="day39">a标签</a>
+</body>
+</html>

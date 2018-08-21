@@ -1,0 +1,9 @@
+资料:
+https://www.cnblogs.com/yuanchenqi/articles/5977825.html
+
+
+外边距和内边
+margin:   用于控制元素与元素之间的距离；margin的最基本用途就是控制元素周围空间的间隔，从视觉角度上达到相互隔开的目的。
+padding:  用于控制内容与边框之间的距离；
+Border(边框):   围绕在内边距和内容外的边框。
+Content(内容):  盒子的内容，显示文本和图像。

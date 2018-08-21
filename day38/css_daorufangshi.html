@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSS</title>
+    <!--2 css 嵌入式-->
+    <style>
+        p{
+            background-color: aqua;
+        }
+    </style>
+
+    <!--4 css导入式-->
+    <style>
+        @import "css_file.css";
+    </style>
+</head>
+<body>
+
+<!--1 css 行内式 -->
+<p style="background-color: olivedrab">这个是css行内式引入范式</p>
+
+
+<!--2 css 嵌入式-->
+<!--1 我放在这里也可以-->
+<!--<style>-->
+    <!--p{-->
+        <!--background-color: olivedrab;-->
+    <!--}-->
+<!--</style>-->
+<p>somethings,好像style不在head中也可以啊,我放到了body中了</p>
+<p>还把p标签放到body外面了</p>
+
+
+<!--3 css 链接式-->
+<link href="css_file.css" rel="stylesheet" type="text/css">
+<p class="as">这是css链接式导入方式,一般都是用css链接式</p>
+<p class="as">链接式的好处是渲染的方式比导入式好等...</p>
+
+<!--4 css导入式-->
+<p id="Z">这是css文件导入式,导入式遵循的是css的语法</p>
+
+</body>
+</html>
+
+<!--<p>1 somethings,好像style不在head中也可以啊,我放到了body中了</p>-->
+<!--<p>还把p标签放到body外面了,也可以</p>-->

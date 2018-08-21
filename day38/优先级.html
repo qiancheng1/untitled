@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        /*div{*/
+            /*background-color: rebeccapurple;*/
+        /*}*/
+
+        /*#123{*/
+            /*background-color: olivedrab;*/
+        /*}*/
+        /*.sk{*/
+            /*background-color: darkgoldenrod;*/
+        /*}*/
+
+        div[qw]{
+            background-color: rebeccapurple;
+        }
+        #11{
+            background-color: olivedrab;
+        }
+        .sk{
+            background-color: darkgoldenrod;
+        }
+    </style>
+</head>
+<body>
+<div class="sk" id="123" style="background-color: chartreuse">div里面直接修改优先级最高</div>
+<div class="qw">skr1
+    <div class='sk' id="11">skr2
+        <div class="skr" id="22">skr3</div>
+    </div>
+</div>
+<!--0 完全透明 1完全不透明-->
+<div style="color: rgba(200,0,0,.8);font-size: larger;font-family: Andalus;font-weight: bolder">透明度测试</div>
+</body>
+</html>

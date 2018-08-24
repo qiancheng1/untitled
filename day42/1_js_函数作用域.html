@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>作用域</title>
+</head>
+<body>
+<script>
+    // var city = 'beijing';
+    //
+    // function func() {
+    //     var city = 'shanghai';
+    //
+    //     function inner() {
+    //         var city = 'shenzhen';
+    //         console.log(city);
+    //     }
+    //
+    //     inner();
+    // }
+    //
+    // func();
+
+
+    var city = 'beijing';
+
+    function Bar() {
+        console.log(city);
+    }
+
+    function func() {
+        //这个作用域就在func里面,在bar中执行的还是全局的city
+        var city = 'shanghai';
+        return Bar;
+    }
+
+    var ret = func();
+    ret();    //beijing
+</script>
+</body>
+</html>

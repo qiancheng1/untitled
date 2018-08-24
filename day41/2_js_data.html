@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JS</title>
+</head>
+<body>
+<script>
+    var now = new Data();
+    document.write(now.toLocaleString())
+
+    var nowd3=new Date("04/03/20 11:12");
+    document.write(nowd3.toLocaleDateString())
+
+
+//    匿名函数
+    var func = function (x) {
+        alert(x)
+    };
+
+    func(123)
+
+    //整体作为一个函数的名字,然后再执行,有参数传参数....
+    //function是函数创建关键字 这个不能不要
+    (function(arg){
+        alert(arg)
+    })("qiancheng");
+</script>
+</body>
+</html>

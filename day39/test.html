@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script type="text/javascript">
+        function change() {
+            var btn = document.getElementById("asdf");
+            // alert(btn.getAttribute("src",2))
+            if (btn.getAttribute("src", 2) == 'off.png') {
+                btn.setAttribute("src", "on.png");
+            } else {
+                btn.setAttribute("src", 'off.png')
+            }
+        }
+    </script>
+</head>
+<body align="center">
+<p>这是台灯</p>
+<div>
+    <img id="asdf" src="on.png"/><br/>
+    <button onclick="change()">OnOff</button>
+    <br/>
+</div>
+</body>
+</html>

@@ -66,12 +66,12 @@ def parse_parameter():
         # 只不过我把判断条件弄错了 if true
         # for fi in fileinput.input("build-log/record.log"):
         with open('build-log/record.log','r') as f:
-            fi = f.readline()
-            for line in f:
-                if not len(re.findall(r'efuse', line)):
-                    sign_flag = False
-                else:
-                    sign_flag = True
+            line = f.readlines()
+            line = str(line)
+            if not len(re.findall(r'efuse', line)):
+                sign_flag = False
+            else:
+                sign_flag = True
     logging.info("sign flag is: %s" % sign_flag)
     return sign_flag
 
@@ -117,11 +117,11 @@ def do_checksum(route):
     elif os.path.exists('CheckSum_Gen.zip'):
         pass
     else:
-        print('CheckSum_Gen.zip is not exits')
+        logging.error('CheckSum_Gen.zip is not exits')
         sys.exit(1)
     ret, stdout, stderr = shell('unzip {0}'.format('CheckSum_Gen.zip'))
     if ret != 0:
-        print('unzip Checksum error')
+        logging.error('unzip Checksum error')
         sys.exit(1)
     else:
         print('\033[0;32m %s \033[0m' % '请手动到当前路径的archivement里面手动执行checksum')
@@ -211,7 +211,7 @@ def release_file_handler(flag):
             snapshots = sorted(snapshots,key=lambda x:os.path.getctime(file),reverse=True)
             logging.info("snapshots sorted %s" % snapshots)
     if len(snapshots) != 2:
-        logging.info('has no matched snapshots,skip execute get_snapshot_commit_diff')
+        logging.info('has no matched snapshots, skip execute get_snapshot_commit_diff')
     else:
         shell('./get_snapshot_commit_diff.sh {1} {0}'.format(snapshots[0],snapshots[1]))
     if os.path.exists('log_update.csv'):

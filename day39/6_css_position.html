@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Position</title>
+
+    <style>
+        *{
+            margin: 0px;
+        }
+
+        .dv1{
+            background: red;
+            width: 200px;
+            height: 100px;
+        }
+
+        .dv2{
+            background: yellowgreen;
+            width: 200px;
+            height: 100px;
+            /*这样的定位不会脱离文档流,位置还在,只不过是被覆盖了*/
+            position: relative;
+            left: 100px;
+            top: 100px;
+            /*right: 200px;*/
+        }
+        .dv3{
+            background: green;
+            width: 200px;
+            height: 200px;
+            position: relative;
+            top: -100px;
+        }
+        .dv4{
+            background: rebeccapurple;
+            width: 200px;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+<div class="dv1"></div>
+<div class="dv2"></div>
+<div class="dv3"></div>
+<div class="dv4"></div>
+</body>
+</html>

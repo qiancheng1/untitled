@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DOM</title>
+</head>
+<body>
+    <div class="d1">
+        <div class="d2">1</div>
+        <div class="d2">2</div>
+        <div class="d2">3</div>
+        <div class="d2">4</div>
+        <div class="d2">5</div>
+        <p class="p2" onclick="f1(this)">6</p>
+    </div>
+
+    <script>
+        // var ele = document.getElementsByClassName('p2')[0];
+        //     console.log(ele.previousElementSibling)
+        function f1(that) {
+            //that就是p标签对象
+            console.log(that);
+
+            console.log(that.previousElementSibling);
+            console.log(that.parentNode)
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DOM_node</title>
+</head>
+<body>
+<div class="div1">
+    <p name="littleP" class="p1">warLock</p>
+    <div class="div2">caption
+        <div>div3</div>
+        <a href="">click to boom</a>
+    </div>
+</div>
+
+<script>
+    var ele = document.getElementsByClassName('p1')[0]
+    console.log(ele.nextElementSibling.children)
+
+//    找div1下面的子div标签
+//    这是局部查找,局部查找不支持查找byId,byNname操作.
+
+    var ele_1 = document.getElementsByClassName('div1')[0]
+    var ins = ele_1.getElementsByTagName('span')
+    console.log(ins[0].innerHTML)
+</script>
+</body>
+</html>

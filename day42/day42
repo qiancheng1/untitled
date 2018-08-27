@@ -1,0 +1,47 @@
+DOM对象
+
+window对象::
+alert()            显示带有一段消息和一个确认按钮的警告框。
+confirm()          显示带有一段消息以及确认按钮和取消按钮的对话框。
+prompt()           显示可提示用户输入的对话框。
+
+open()             打开一个新的浏览器窗口或查找一个已命名的窗口。
+close()            关闭浏览器窗口。
+setInterval()      按照指定的周期（以毫秒计）来调用函数或计算表达式。
+clearInterval()    取消由 setInterval() 设置的 timeout。
+setTimeout()       在指定的毫秒数后调用函数或计算表达式。
+clearTimeout()     取消由 setTimeout() 方法设置的 timeout。
+scrollTo()         把内容滚动到指定的坐标。
+
+
+History 对象属性:
+History 对象包含用户（在浏览器窗口中）访问过的 URL。
+History 对象是 window 对象的一部分，可通过 window.history 属性对其进行访问。
+
+back()    加载 history 列表中的前一个 URL。
+forward()    加载 history 列表中的下一个 URL。
+go()    加载 history 列表中的某个具体页面。
+
+
+
+DOM标签:
+下面的都要记住::::
+
+节点(自身)属性:
+innerHTML - 节点（元素）的文本值
+
+推荐导航属性：
+parentElement              // 父节点标签元素
+children                        // 所有子标签
+firstElementChild          // 第一个子标签元素
+lastElementChild           // 最后一个子标签元素
+nextElementtSibling       // 下一个兄弟标签元素
+previousElementSibling  // 上一个兄弟标签元素
+
+
+页面查找：主要是前三种
+
+通过使用 getElementById() 方法
+通过使用 getElementsByTagName() 方法
+通过使用 getElementsByClassName() 方法
+通过使用 getElementsByName() 方法

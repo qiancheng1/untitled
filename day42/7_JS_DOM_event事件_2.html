@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script>
+        <!--这里就是等body都加载完了才会执行script里面的内容-->
+        function f1() {
+            var ele = document.getElementsByClassName('ck')[0];
+            console.log(ele.innerHTML)
+        }
+    </script>
+</head>
+<body onload="f1()">
+    <div class="ck">warLock</div>
+</body>
+</html>

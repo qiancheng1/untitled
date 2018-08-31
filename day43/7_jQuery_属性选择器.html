@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>属性选择器</title>
+</head>
+<body>
+
+<a href="">click</a>
+
+<p id="p1" alex="sb">pppp</p>
+<p id="p2" alex="sb">pppp</p>
+
+<div class="outer">outer
+    <div class="inner">
+        inner
+        <p>inner p</p>
+    </div>
+    <p>alex</p>
+</div>
+<div class="outer2">Yuan</div>
+<p>xialv</p>
+
+<ul>
+    <li class="begin">1111</li>
+    <li>2222</li>
+    <li>3333</li>
+    <li>4444</li>
+    <li>4444</li>
+    <li id="end">4444</li>
+    <li>4444</li>
+</ul>
+
+<input type="text">
+<input type="checkbox">
+<input type="submit">
+<p yyc="skr" id="col" >属性选择器</p>
+<p yyc="skr" id="cool">属性选择器22</p>
+<input type="checkbox" value="yep" >do u feel skr ?<br/>
+
+<script src="jquery-3.3.1.js"></script>
+
+<script>
+    $("[yyc='skr']").css('color','red');
+    $("[type='checkbox']").css('width','400px');
+    // $("[li]").eq(2).css('color','red');
+
+    //找儿子
+    $(".outer").children('p').css('color','red');
+
+    //找outer下面所有
+    $(".outer").find('p').css('color','red');
+
+
+    // $("li").eq(1).next().css('color','green');
+    // $("li").eq(1).nextAll().css('color','blue');
+    // $("li").eq(1).nextUntil("#end").css('color','brown');
+
+    //prev和next相反的
+    // $("li").eq(3).prev().css('color','green');
+    // $("li").eq(4).prevUntil("li:eq(0)").css('color','pink');
+
+
+    // $(".outer .inner p").parents().css('color','blue');
+    // $(".outer .inner p").parent().css('color','blue');
+    // $(".outer .inner p").parentsUntil("body").css('color','blue');
+
+
+
+
+    $(".outer").siblings().css('color','blue');
+
+</script>
+</body>
+</html>

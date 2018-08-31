@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>二级联动</title>
+</head>
+<body>
+<select id="province">
+    <option>请选择城市</option>
+</select>
+
+<select id="cities">
+    <option>请选择城市</option>
+</select>
+
+<script>
+    data = {安徽: ["安庆", "合肥", "淮南"], 山东: ["枣庄", "济南", "青岛"], 江苏: ["泰州", "苏州", "扬州"]}
+
+    var pro_ele = document.getElementById("province");
+    var cities_ele = document.getElementById("cities");
+
+    for (var c in data) {
+        var opt = document.createElement("option");
+        opt.innerHTML = c;
+        pro_ele.appendChild(opt);
+    }
+
+    pro_ele.onchange = function () {
+        //这是精髓 要知道选中的是谁
+        console.log(this.selectedIndex);
+        //出来的是option标签
+        console.log(this.options[this.selectedIndex]);
+
+        // var cities = data[this.options[this.selectedIndex]];//写错了 没有加innerHTML
+        var cities = data[this.options[this.selectedIndex].innerHTML];
+
+        // cities.length = 0;
+        cities_ele.options.length = 1;
+
+        for (var i = 0; i < cities.length; i++) {
+            var city_ele = document.createElement("option");
+            city_ele.innerHTML = cities[i];
+            cities_ele.appendChild(city_ele)
+        }
+    }
+
+</script>
+</body>
+</html>

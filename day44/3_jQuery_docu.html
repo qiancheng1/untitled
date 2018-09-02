@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div class="c1">
+        <p>PPP</p>
+    </div>
+
+    <button>add</button>
+    <script src="jquery-3.3.1.js"></script>
+
+    <script>
+        // $(".c1").append('<h1>hello qian</h1>')
+        
+        $("button").click(function () {
+            // $(".c1").append("<h1>hello qian</h1>");
+
+            var $ele = $("<h1>");
+            $ele.html("在现场");
+            $ele.css("color", "red");
+            // $(".c1").append($ele);
+            $ele.appendTo($(".c1"))
+        })
+    </script>
+</body>
+</html>

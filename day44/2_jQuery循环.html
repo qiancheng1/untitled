@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<p>aaaaaaaaa</p>
+<p>aaaaaaaaa</p>
+<p>aaaaaaaaa</p>
+
+<script src="jquery-3.3.1.js"></script>
+<script>
+    arr = [111111, 222222, 333333];
+    // // for (var i=0; i<arr.length; i ++){
+    // for (var i in arr){
+    //     $("p").eq(i).html(arr[i]);
+    // }
+
+
+    //循环第一种方法
+    $.each(arr, function (x, y) {
+        console.log(x);
+        console.log(y);
+    });
+
+    $("p").each(function () {
+        console.log($(this))
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="outer">
+    <div class="item">
+        <button onclick="add(this)">+</button>
+        <input type="text">
+    </div>
+
+    <script src="jquery-3.3.1.js"></script>
+    <script>
+        function add(self) {
+            //不应该啊 还是这么写了啊
+            // var $ele = $("button").parent().clone();
+            var $ele = $(self).parent().clone();
+            $ele.children('button').html('-').attr("onclick", "remove_obj(this)");
+            $(".outer").append($ele);
+        }
+
+        function remove_obj(self) {
+            $(self).parent().remove();
+        }
+    </script>
+</div>
+</body>
+</html>

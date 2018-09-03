@@ -21,8 +21,27 @@
             var $ele = $("<h1>");
             $ele.html("在现场");
             $ele.css("color", "red");
+
+            //内部插入
             // $(".c1").append($ele);
-            $ele.appendTo($(".c1"))
+            // $ele.appendTo($(".c1"));
+
+
+
+        //    外部插入
+        //     $(".c1").after($ele);
+        //    要注意ele前面没有()
+        //     $ele.insertAfter(".c1");
+
+            // $(".c1").before($ele);
+            // $ele.insertBefore(".c1");
+
+        //    替换
+        //     $("p").replaceWith($ele);
+
+        //    删除与清空
+        //     $(".c1").empty();
+            $(".c1").remove();
         })
     </script>
 </body>

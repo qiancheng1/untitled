@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 class HtmlParser(object):
     def parse(self, page_url, html_cont):
-        soup = BeautifulSoup(html_cont,'html.parser',from_encoding='utf-8')
+        soup = BeautifulSoup(html_cont,'lxml',from_encoding='utf-8')
         new_urls = self._get_new_urls(page_url,soup)
         new_data = self._get_new_data(page_url,soup)
         return new_urls,new_data
